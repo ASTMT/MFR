@@ -1,0 +1,4 @@
+! Create an array to read the Matlab results into
+
+! Dimensions are #rows,#cols
+*DIM,MERIT,ARRAY,6,6

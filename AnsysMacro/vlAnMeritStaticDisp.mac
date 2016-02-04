@@ -1,0 +1,80 @@
+!! FileName: vlAnMeritStaticDisp.mac
+
+!! Run the Ansys Macro "MeritStaticDisp" with the following arguments 
+!!       "vlAnMeritStaticDisp,'InNodeFile','ResultFile',NumInp"
+!!		The input arguments are
+!!       -	[InNodeFile], txt file, lists nodes and DOF’s to report displacements at.  Same format a SD.SSinput
+!!       -	[ResultFile], name of output file to write static displacements to.
+!!       -	[NumInp], number of rows in the input file.
+!!       Note that the above input files must be formatted properly to be able to be read by Ansys.  
+!!       The matlab routines AnsysFormatInt and AnsysFormatFloat can be used to ensure that the 
+!!       files have the correct format.  The inputs are best stored in a separate macro that calls 
+!!       "vlAnMeritStaticDisp".  For example, 
+!!
+!!       vlAnMeritStaticDisp,'vlAnMeritVlot20SSoutput','vlAnMeritVlot20disp',1998
+
+!!
+!!   Scott Roberts, Jan 8, 2006
+!!
+
+/PREP7
+IJK=
+! Set input and output parameters here
+INNODEFILE = arg1
+RESULTFILE = arg2
+numinp=arg3	! Number of rows of input and output
+
+! Define arrays
+*DIM,inp,ARRAY,2,numinp,1
+
+*VREAD,inp(1,1),%INNODEFILE%,'txt',,IJK,2,numinp
+(F10.0,F10.0)
+
+! Enter solution module and solve static deflection
+! (solution type and loads applied in script that calls this script) 
+! solve gravitational load
+/solu
+csys,0
+allsel,all
+
+! Added to take into account prestrain in the top end vanes (Amir: February 17, 2012)
+antyp,static
+solcontrol,on
+sstif,on
+! -----------------------------------------------------------------------------------
+
+solve
+finish
+allse
+
+! Enter postprocessor module and view results
+/POST1
+set,1		! read results from first load step
+plnsol,u,sum	! create contour plot of nodal displacements
+RSYS,SOLU	! Set results coordinate system to "As Calculated"
+		! to get nodal displacements
+
+! Write out displacements
+*cfopen,%RESULTFILE%,txt	! Opens a "command" file
+*DO,ii,1,numinp,1
+    *IF,inp(2,ii),EQ,1,THEN
+        *VWRITE,UX(inp(1,ii))
+(E16.8)
+    *ELSEIF,inp(2,ii),EQ,2,THEN
+        *VWRITE,UY(inp(1,ii))
+(E16.8)
+    *ELSEIF,inp(2,ii),EQ,3,THEN
+        *VWRITE,UZ(inp(1,ii))
+(E16.8)
+    *ELSEIF,inp(2,ii),EQ,4,THEN
+        *VWRITE,ROTX(inp(1,ii))
+(E16.8)
+    *ELSEIF,inp(2,ii),EQ,5,THEN
+        *VWRITE,ROTY(inp(1,ii))
+(E16.8)
+    *ELSEIF,inp(2,ii),EQ,6,THEN
+        *VWRITE,ROTZ(inp(1,ii))
+(E16.8)
+    *ENDIF
+*ENDDO
+*cfclose
