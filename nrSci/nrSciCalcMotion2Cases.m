@@ -1,6 +1,6 @@
 % File: <nrSciCalcMotion2Cases.m>
 %
-% Syntax: motions = nrSciCalcMotion2Cases(basisRES,pertRES,ElevAng,fid)
+% Syntax: motions = nrSciCalcMotion2Cases(basisRES,pertRES,ZenAngDiff,fid)
 %
 % Description:
 % This function reports the motion of the M1, M2, M3 and Focal Plane
@@ -12,7 +12,7 @@
 % Input Parameters:
 %       basisRESFILE - MFR output RES data structure
 %       pertRESFILE - MFR output RES data structure
-%       ElevAng - Elevation angle of pert case minus the basis case (in
+%       ZenAngDiff - Zenith angle of pert case minus the basis case (in
 %       degrees)
 %       fid - file ID to write to
 %
@@ -97,7 +97,7 @@
 % 					                sation du logiciel.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function GRAVRES = nrSciCalcMotion2Cases(basisRES,pertRES,ElevAng,fid)
+function GRAVRES = nrSciCalcMotion2Cases(basisRES,pertRES,ZenAngDiff,fid)
 
 % Coordinate systems are:
 %   Aligned relative to M1 actuator fit
@@ -148,7 +148,7 @@ T_M1OP_M1AP = vlCsInvEulerXYZ(delta.EXYZM1P);
 
 % Note that M1OB and M1OP vary by the difference in elevaton angle,
 % therefore:
-T_M1OB_M1OP = vlCsRotX(ElevAng);
+T_M1OB_M1OP = vlCsRotX(ZenAngDiff);
 
 % Now we can calculate how much the aligned M1's have moved between cases
 T_M1OB_M1AP = vlCsMult(T_M1OB_M1OP,T_M1OP_M1AP);
@@ -202,7 +202,7 @@ T_M3AB_M3DB = vlCsInvEulerXYZ(basis.EULM3A_M3D);
 T_M3AP_M3DP = vlCsInvEulerXYZ(delta.EULM3A_M3D);
 
 % The M3 CS rotates as the telescope tilts in elevation
-T_M3AB_M3AP = vlCsMult(vlCsRotX(45),vlCsRotZ(-ElevAng),vlCsRotX(-45));
+T_M3AB_M3AP = vlCsMult(vlCsRotX(45),vlCsRotZ(-ZenAngDiff),vlCsRotX(-45));
 
 T_M3AB_M3DP = vlCsMult(T_M3AB_M3AP,T_M3AP_M3DP);
 T_M3DB_M3DP = vlCsMult(vlCsInv(T_M3AB_M3DB),T_M3AB_M3DP);
@@ -238,10 +238,10 @@ T_FOSAP_FOSDP = vlCsInvEulerXYZ(delta.EULFOSA_FOSD);
 % rotating the coordinate system in relation to to the structure that is
 % deflecting.
 
-T_FOSAB_FOSAP = vlCsRotZ(ElevAng);
+T_FOSAB_FOSAP = vlCsRotZ(ZenAngDiff);
 T_FOSAB_FOSDP = vlCsMult(T_FOSAB_FOSAP,T_FOSAP_FOSDP);
 T_FOSDB_FOSDP = vlCsMult(vlCsInv(T_FOSAB_FOSDB),T_FOSAB_FOSDP);
-T_FOSDB_FOSDP_NoElev = vlCsMult(T_FOSDB_FOSDP,vlCsRotZ(-ElevAng));
+T_FOSDB_FOSDP_NoElev = vlCsMult(T_FOSDB_FOSDP,vlCsRotZ(-ZenAngDiff));
 
 %T_FOSAP_FOSDTotal = T_FOSDB_FOSDP;
 %T_M1AP_FOSDP = vlCsMult(T_M1A_FOSA,T_FOSAP_FOSDTotal);
@@ -260,7 +260,7 @@ GRAVRES.EULFOSO_FOSD = delta.EULFOSO_FOSD;
 
 %% FOS to M3 Transformation
 T_FOSDB_M3DP = vlCsMult(T_FOSA_M3A,T_M3DB_M3DP);
-T_FOSDB_FOSDP_NoElev = vlCsMult(T_FOSDB_FOSDP,vlCsRotZ(-ElevAng));
+T_FOSDB_FOSDP_NoElev = vlCsMult(T_FOSDB_FOSDP,vlCsRotZ(-ZenAngDiff));
 T_FOSDP_NoElev_M3DP = vlCsMult(vlCsInv(T_FOSDB_FOSDP_NoElev),T_FOSDB_M3DP);
 
 GRAVRES.T_FOSDP_NoElev_M3DP = T_FOSDP_NoElev_M3DP;
@@ -289,7 +289,7 @@ fprintf(fid,'\t\tDisplaced CS: position under displacement in FEA model\n\n');
 fprintf(fid,'\tInput Cases:\n');
 fprintf(fid,'\t\tBasis case is %s\n',basis.outFileRoot);
 fprintf(fid,'\t\tPerturbed case is %s\n',delta.outFileRoot);
-fprintf(fid,'\t\tThe difference in elevation angle between the two cases is %d degrees\n',ElevAng);
+fprintf(fid,'\t\tThe difference in elevation angle between the two cases is %d degrees\n',ZenAngDiff);
 
 fprintf(fid,'\n\tActuator Stroke Calculation Information\n');
 fprintf(fid,'\t\tMethod of Actuator Stroke Minimization [ActFit] is: %s\n',delta.ActFit);
