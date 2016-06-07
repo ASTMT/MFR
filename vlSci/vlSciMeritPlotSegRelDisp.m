@@ -155,12 +155,12 @@ if plotflag
 end
 
 if isequal(bset,[0 0 0 0 0 0]) && isequal(rset,[0 0 0 0 0 0])
-	error(‘both best and rset are empty’);
+	error('both best and rset are empty');
 end
 
 if isequal(bset,[0 0 0 0 0 0])
 	gslist = rset;
-elseif isequal(rest,[0 0 0 0 0 0])
+elseif isequal(rset,[0 0 0 0 0 0])
 	gslist = bset;
 else
 	gslist = [bset ; rset];
