@@ -31,6 +31,12 @@
 %
 % Revision History
 %
+% March 31, 2023 version (edits done by TIO.STR (Amir Sadjadpour)):
+% 1 Changed ~isequal(FEALstPos,MALstPos) function on line 84 to 
+%   max(abs(FEALstPos-MALstPos))>.000001 considering that the former 
+%   checks for an EXACT match & the latter allows reasonable tolerance 
+% 2 Corrected the typo on line 89 - Changed err_flag to error_flag
+%
 % $Id: 
 %
 % INDENT-OFF*
@@ -75,11 +81,13 @@ for ii=1:CST.Num
         NdLstIdx = CST.Meta(ii).NdLstStart+(jj-1);
         FEALstPos = FEAData(NdLstIdx,2:4);
         MALstPos = MA.NodeLst(NdLstIdx,2:4);
-        if ~isequal(FEALstPos,MALstPos)
+        %if ~isequal(FEALstPos,MALstPos)
+        if max(abs(FEALstPos-MALstPos))>.000001
             fprintf('\n\nError: Node %d position difference\n',nodenum);
             fprintf('\tFEA List Pos: %.3f,%.3f,%.3f\n',FEALstPos(1:3));
             fprintf('\tMA List Pos: %.3f,%.3f,%.3f\n',MALstPos(1:3));
-            err_flag = 1;
+            %err_flag = 1;
+            error_flag = 1;
         end
         % Find out if the orientation of the node matches the CST in Matlab
         % First get the CST from FEA data. This is in the G coordinate
